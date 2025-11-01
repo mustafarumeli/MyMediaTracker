@@ -35,6 +35,7 @@ jobs:
         run: |
           cd frontend
           npm run build
+          ls -la dist
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
