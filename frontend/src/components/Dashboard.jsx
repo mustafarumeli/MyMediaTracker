@@ -176,7 +176,17 @@ function Dashboard() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="🔍 Ara..."
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !showForm) {
+                setShowForm(true);
+                setTimeout(() => {
+                  // Form açıldıktan sonra ilk input'a focus
+                  const firstInput = document.querySelector('input[type="text"]');
+                  if (firstInput) firstInput.focus();
+                }, 100);
+              }
+            }}
+            placeholder="🔍 Ara... (Enter = Yeni Ekle)"
             className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
