@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024"
+     xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MustafaMyHobbyTracker logo">
+  <!-- Dark-mode-ready vector icon: gold (#FFB800) on transparent background -->
+  <defs>
+    <style>
+      .gold { fill: #FFB800; stroke: none; }
+      .outline { fill: none; stroke: #FFB800; stroke-width: 56; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <!-- Head / outline circle (uses stroke to keep chibi look) -->
+  <circle cx="512" cy="560" r="360" class="outline"/>
+
+  <!-- Headband (solid rectangle with rounded corners) -->
+  <rect x="200" y="250" width="624" height="110" rx="28" class="gold"/>
+
+  <!-- Hair tuft -->
+  <path d="M360 400 C420 360, 480 360, 540 400" class="gold"/>
+
+  <!-- Ears (simple rounded shapes) -->
+  <path d="M160 560 C140 520, 140 640, 160 600" class="outline"/>
+  <path d="M864 560 C884 520, 884 640, 864 600" class="outline"/>
+
+  <!-- V-shaped eyes (stylized) -->
+  <path d="M360 520 L420 600 L480 520" stroke="#FFB800" stroke-width="40" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M544 520 L604 600 L664 520" stroke="#FFB800" stroke-width="40" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Happy smile -->
+  <path d="M380 700 Q512 760 644 700" stroke="#FFB800" stroke-width="48" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+</svg>

@@ -23,6 +23,11 @@ function Login() {
     <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
       <div className="max-w-md w-full bg-gray-800 rounded-lg shadow-xl p-8">
         <div className="text-center mb-8">
+          <img 
+            src="/logo.svg" 
+            alt="Logo" 
+            className="w-24 h-24 mx-auto mb-4"
+          />
           <h2 className="text-3xl font-bold text-white mb-2">
             Giriş Yap
           </h2>
