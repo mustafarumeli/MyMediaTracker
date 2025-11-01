@@ -80,7 +80,7 @@ function Dashboard() {
       <nav className="bg-gray-800 shadow-lg">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-3">
-            <img src="/logo.svg" alt="Logo" className="w-10 h-10" />
+            <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="Logo" className="w-10 h-10" />
             <h1 className="text-2xl font-bold">Medya Takip Sistemim</h1>
           </div>
           <div className="flex items-center space-x-4">

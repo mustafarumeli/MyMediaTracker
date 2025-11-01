@@ -24,7 +24,7 @@ function Login() {
       <div className="max-w-md w-full bg-gray-800 rounded-lg shadow-xl p-8">
         <div className="text-center mb-8">
           <img 
-            src="/logo.svg" 
+            src={`${import.meta.env.BASE_URL}logo.svg`}
             alt="Logo" 
             className="w-24 h-24 mx-auto mb-4"
           />
