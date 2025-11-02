@@ -3,6 +3,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useMediaItems } from '../hooks/useMediaItems';
 import MediaForm from './MediaForm';
 import MediaList from './MediaList';
+import MediaTable from './MediaTable';
+import { exportMediaData } from '../utils/exportData';
 
 function Dashboard() {
   const { currentUser, logout } = useAuth();
@@ -11,12 +13,34 @@ function Dashboard() {
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [viewMode, setViewMode] = useState(() => {
+    return localStorage.getItem('viewMode') || 'grid';
+  });
+  const [exporting, setExporting] = useState(false);
+
+  // Save view mode to localStorage
+  useEffect(() => {
+    localStorage.setItem('viewMode', viewMode);
+  }, [viewMode]);
 
   async function handleLogout() {
     try {
       await logout();
     } catch (error) {
       console.error('Logout error:', error);
+    }
+  }
+
+  async function handleExport() {
+    try {
+      setExporting(true);
+      const result = await exportMediaData(currentUser);
+      alert(`✅ ${result.count} medya başarıyla export edildi!\nDosya: ${result.filename}`);
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('❌ Export sırasında bir hata oluştu.');
+    } finally {
+      setExporting(false);
     }
   }
 
@@ -84,6 +108,15 @@ function Dashboard() {
             <h1 className="text-2xl font-bold bg-gradient-to-r from-gold to-gold-light bg-clip-text text-transparent">Medya Takip Sistemim</h1>
           </div>
           <div className="flex items-center space-x-4">
+            <button
+              onClick={handleExport}
+              disabled={exporting || mediaItems.length === 0}
+              className="bg-dark-900 hover:bg-gold/20 border border-gold text-gold px-4 py-2 rounded-lg transition-all duration-300 hover:shadow-glow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              title="JSON Export"
+            >
+              <span>💾</span>
+              <span className="hidden sm:inline">{exporting ? 'Export...' : 'Export'}</span>
+            </button>
             <span className="text-gold hidden sm:block">{currentUser?.email}</span>
             <button
               onClick={handleLogout}
@@ -146,7 +179,8 @@ function Dashboard() {
 
         {/* Filter and Search */}
         <div className="mb-6 space-y-4">
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 items-center">
+            {/* Category Filters */}
             <button
               onClick={() => setFilter('all')}
               className={`px-4 py-2 rounded-lg transition-all duration-300 ${
@@ -170,6 +204,34 @@ function Dashboard() {
                 {cat} ({categoryStats[cat]})
               </button>
             ))}
+
+            {/* View Mode Toggle */}
+            <div className="flex gap-2 ml-auto">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`px-4 py-2 rounded-lg transition-all duration-300 flex items-center gap-2 ${
+                  viewMode === 'grid'
+                    ? 'bg-gold text-black font-bold shadow-glow'
+                    : 'bg-dark-900 border border-gold/30 text-gold hover:border-gold hover:shadow-glow-sm'
+                }`}
+                title="Grid View"
+              >
+                <span>🔲</span>
+                <span className="hidden sm:inline">Grid</span>
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-4 py-2 rounded-lg transition-all duration-300 flex items-center gap-2 ${
+                  viewMode === 'list'
+                    ? 'bg-gold text-black font-bold shadow-glow'
+                    : 'bg-dark-900 border border-gold/30 text-gold hover:border-gold hover:shadow-glow-sm'
+                }`}
+                title="List View"
+              >
+                <span>📋</span>
+                <span className="hidden sm:inline">List</span>
+              </button>
+            </div>
           </div>
           
           <input
@@ -191,13 +253,21 @@ function Dashboard() {
           />
         </div>
 
-        {/* Media List */}
-        <MediaList
-          media={filteredMedia}
-          loading={loading}
-          onDelete={handleDeleteMedia}
-          onEdit={handleEditMedia}
-        />
+        {/* Media List/Table */}
+        {viewMode === 'grid' ? (
+          <MediaList
+            media={filteredMedia}
+            loading={loading}
+            onDelete={handleDeleteMedia}
+            onEdit={handleEditMedia}
+          />
+        ) : (
+          <MediaTable
+            mediaItems={filteredMedia}
+            onDelete={handleDeleteMedia}
+            onEdit={handleEditMedia}
+          />
+        )}
       </div>
     </div>
   );
