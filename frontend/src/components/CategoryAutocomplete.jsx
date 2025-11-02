@@ -90,12 +90,12 @@ function CategoryAutocomplete({ value, onChange, suggestions = [] }) {
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
         placeholder="Kategori seçin veya yazın..."
-        className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full px-4 py-2 bg-dark-850 border border-gold/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gold focus:shadow-glow-sm transition-all duration-300"
         autoComplete="off"
       />
       
       {showSuggestions && filteredSuggestions.length > 0 && (
-        <div className="absolute z-10 w-full mt-1 bg-gray-700 border border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <div className="absolute z-10 w-full mt-1 bg-dark-900 border border-gold/30 rounded-lg shadow-glow-sm max-h-60 overflow-y-auto">
           {filteredSuggestions.map((suggestion, index) => (
             <button
               key={index}
@@ -104,7 +104,7 @@ function CategoryAutocomplete({ value, onChange, suggestions = [] }) {
                 e.preventDefault();
                 handleSuggestionClick(suggestion);
               }}
-              className="w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors duration-150 flex items-center gap-2 text-white"
+              className="w-full px-4 py-2 text-left hover:bg-dark-850 hover:text-gold transition-all duration-150 flex items-center gap-2 text-white"
             >
               <span className="text-xl">{CATEGORY_EMOJIS[suggestion] || '📁'}</span>
               <span>{suggestion}</span>

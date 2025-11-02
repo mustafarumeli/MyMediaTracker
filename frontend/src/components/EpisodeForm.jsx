@@ -1,65 +1,54 @@
 import { useState, useEffect } from 'react';
 import StarRating from './StarRating';
-import CategoryAutocomplete from './CategoryAutocomplete';
-import ImageUpload from './ImageUpload';
 
-function MediaForm({ onSubmit, onCancel, initialData = null, existingCategories = [] }) {
+function EpisodeForm({ onSubmit, onCancel, initialData = null }) {
+  const [seasonNumber, setSeasonNumber] = useState('');
+  const [episodeNumber, setEpisodeNumber] = useState('');
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('');
-  const [rating, setRating] = useState(0);
-  const [imageData, setImageData] = useState({ url: '', type: 'none' });
   const [notes, setNotes] = useState('');
+  const [rating, setRating] = useState(0);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (initialData) {
+      setSeasonNumber(initialData.seasonNumber?.toString() || '');
+      setEpisodeNumber(initialData.episodeNumber?.toString() || '');
       setTitle(initialData.title || '');
-      setCategory(initialData.category || '');
-      setRating(initialData.rating || 0);
-      setImageData({ 
-        url: initialData.imageUrl || '', 
-        type: initialData.imageType || 'none' 
-      });
       setNotes(initialData.notes || '');
+      setRating(initialData.rating || 0);
     }
   }, [initialData]);
 
   async function handleSubmit(e) {
     e.preventDefault();
     
+    if (!seasonNumber || !episodeNumber) {
+      alert('Sezon ve bölüm numarası gereklidir');
+      return;
+    }
+
     if (!title.trim()) {
-      alert('Başlık gereklidir');
-      return;
-    }
-
-    if (!category.trim()) {
-      alert('Kategori gereklidir');
-      return;
-    }
-
-    if (rating === 0) {
-      alert('Lütfen bir puan verin');
+      alert('Bölüm başlığı gereklidir');
       return;
     }
 
     setLoading(true);
     try {
       await onSubmit({
+        seasonNumber: parseInt(seasonNumber),
+        episodeNumber: parseInt(episodeNumber),
         title: title.trim(),
-        category: category.trim(),
-        rating,
-        imageUrl: imageData.url || '',
-        imageType: imageData.type || 'none',
-        notes: notes.trim()
+        notes: notes.trim(),
+        rating: rating || 0
       });
       
       // Form reset
       if (!initialData) {
+        setSeasonNumber('');
+        setEpisodeNumber('');
         setTitle('');
-        setCategory('');
-        setRating(0);
-        setImageData({ url: '', type: 'none' });
         setNotes('');
+        setRating(0);
       }
     } catch (error) {
       console.error('Form submission error:', error);
@@ -71,15 +60,48 @@ function MediaForm({ onSubmit, onCancel, initialData = null, existingCategories 
 
   return (
     <div className="bg-dark-900 border border-gold/30 rounded-lg p-6 shadow-glow-sm">
-      <h3 className="text-2xl font-bold text-gold mb-6">
-        {initialData ? '✏️ Düzenle' : '➕ Yeni Medya Ekle'}
+      <h3 className="text-xl font-bold text-gold mb-4">
+        {initialData ? '✏️ Bölümü Düzenle' : '➕ Yeni Bölüm Ekle'}
       </h3>
       
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Sezon ve Bölüm Numarası */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Sezon Numarası *
+            </label>
+            <input
+              type="number"
+              value={seasonNumber}
+              onChange={(e) => setSeasonNumber(e.target.value)}
+              required
+              min="1"
+              className="w-full px-4 py-2 bg-dark-850 border border-gold/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gold focus:shadow-glow-sm transition-all duration-300"
+              placeholder="1"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Bölüm Numarası *
+            </label>
+            <input
+              type="number"
+              value={episodeNumber}
+              onChange={(e) => setEpisodeNumber(e.target.value)}
+              required
+              min="1"
+              className="w-full px-4 py-2 bg-dark-850 border border-gold/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gold focus:shadow-glow-sm transition-all duration-300"
+              placeholder="1"
+            />
+          </div>
+        </div>
+
         {/* Başlık */}
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
-            Başlık *
+            Bölüm Başlığı *
           </label>
           <input
             type="text"
@@ -87,42 +109,19 @@ function MediaForm({ onSubmit, onCancel, initialData = null, existingCategories 
             onChange={(e) => setTitle(e.target.value)}
             required
             className="w-full px-4 py-2 bg-dark-850 border border-gold/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gold focus:shadow-glow-sm transition-all duration-300"
-            placeholder="Film, dizi, anime veya oyun adı"
+            placeholder="Örn: The Beginning"
           />
         </div>
 
-        {/* Kategori (Autocomplete) */}
+        {/* Puan (Opsiyonel) */}
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
-            Kategori *
-          </label>
-          <CategoryAutocomplete
-            value={category}
-            onChange={setCategory}
-            suggestions={existingCategories}
-          />
-        </div>
-
-        {/* Puan (Star Rating) */}
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Puan * (10 üzerinden)
+            Puan (Opsiyonel, 10 üzerinden)
           </label>
           <StarRating
             value={rating}
             onChange={setRating}
-            size="lg"
-          />
-        </div>
-
-        {/* Image Upload */}
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Poster / Kapak Görseli
-          </label>
-          <ImageUpload
-            value={imageData.url}
-            onChange={setImageData}
+            size="md"
           />
         </div>
 
@@ -136,7 +135,7 @@ function MediaForm({ onSubmit, onCancel, initialData = null, existingCategories 
             onChange={(e) => setNotes(e.target.value)}
             rows="3"
             className="w-full px-4 py-2 bg-dark-850 border border-gold/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gold focus:shadow-glow-sm transition-all duration-300"
-            placeholder="Düşünceleriniz, yorumlarınız..."
+            placeholder="Bu bölüm hakkında notlarınız..."
           />
         </div>
 
@@ -149,7 +148,7 @@ function MediaForm({ onSubmit, onCancel, initialData = null, existingCategories 
           >
             {loading ? 'Kaydediliyor...' : (initialData ? '💾 Güncelle' : '➕ Ekle')}
           </button>
-          {initialData && onCancel && (
+          {onCancel && (
             <button
               type="button"
               onClick={onCancel}
@@ -164,4 +163,5 @@ function MediaForm({ onSubmit, onCancel, initialData = null, existingCategories 
   );
 }
 
-export default MediaForm;
+export default EpisodeForm;
+

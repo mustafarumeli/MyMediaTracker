@@ -91,14 +91,14 @@ function ImageUpload({ value, onChange, onUploadStart, onUploadComplete }) {
   return (
     <div className="space-y-4">
       {/* Method tabs */}
-      <div className="flex gap-2 border-b border-gray-600">
+      <div className="flex gap-2 border-b border-gold/30">
         <button
           type="button"
           onClick={() => setUploadMethod('url')}
-          className={`px-4 py-2 transition-colors ${
+          className={`px-4 py-2 transition-all duration-300 ${
             uploadMethod === 'url'
-              ? 'text-blue-400 border-b-2 border-blue-400'
-              : 'text-gray-400 hover:text-gray-300'
+              ? 'text-gold border-b-2 border-gold'
+              : 'text-gray-400 hover:text-gold'
           }`}
         >
           🔗 URL
@@ -125,7 +125,7 @@ function ImageUpload({ value, onChange, onUploadStart, onUploadComplete }) {
             value={imageUrl}
             onChange={handleUrlChange}
             placeholder="https://example.com/image.jpg"
-            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 bg-dark-850 border border-gold/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gold focus:shadow-glow-sm transition-all duration-300"
           />
         </div>
       )}
@@ -134,13 +134,13 @@ function ImageUpload({ value, onChange, onUploadStart, onUploadComplete }) {
       {uploadMethod === 'file' && (
         <div>
           <label className="block">
-            <div className="flex items-center justify-center w-full px-4 py-6 bg-gray-700 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer hover:bg-gray-600 transition-colors">
+            <div className="flex items-center justify-center w-full px-4 py-6 bg-dark-850 border-2 border-dashed border-gold/30 rounded-lg cursor-pointer hover:bg-dark-900 hover:border-gold transition-all duration-300">
               {uploading ? (
                 <div className="text-center">
-                  <div className="text-blue-400 mb-2">Yükleniyor...</div>
-                  <div className="w-full bg-gray-600 rounded-full h-2">
+                  <div className="text-gold mb-2">Yükleniyor...</div>
+                  <div className="w-full bg-dark-900 rounded-full h-2">
                     <div
-                      className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                      className="bg-gold h-2 rounded-full transition-all duration-300 shadow-glow-sm"
                       style={{ width: `${uploadProgress}%` }}
                     />
                   </div>
@@ -151,8 +151,8 @@ function ImageUpload({ value, onChange, onUploadStart, onUploadComplete }) {
               ) : (
                 <div className="text-center">
                   <div className="text-4xl mb-2">📸</div>
-                  <div className="text-gray-300">Resim seçmek için tıklayın</div>
-                  <div className="text-sm text-gray-500 mt-1">Maksimum 5MB</div>
+                  <div className="text-white">Resim seçmek için tıklayın</div>
+                  <div className="text-sm text-gray-400 mt-1">Maksimum 5MB</div>
                 </div>
               )}
             </div>
@@ -178,7 +178,7 @@ function ImageUpload({ value, onChange, onUploadStart, onUploadComplete }) {
           <button
             type="button"
             onClick={clearImage}
-            className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors"
+            className="absolute top-2 right-2 bg-dark-950 hover:bg-red-600 border border-red-500 text-red-400 hover:text-white rounded-full w-8 h-8 flex items-center justify-center transition-all duration-300 hover:shadow-[0_0_15px_rgba(239,68,68,0.5)]"
           >
             ✕
           </button>

@@ -49,24 +49,43 @@ function StarRating({ value = 0, onChange, readonly = false, size = 'md' }) {
           <svg className={starSize} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id={`half-${index}`}>
-                <stop offset="50%" stopColor="#FDB022" />
-                <stop offset="50%" stopColor="#4B5563" />
+                <stop offset="50%" stopColor="#FFB800" />
+                <stop offset="50%" stopColor="#2A2A2A" />
               </linearGradient>
+              <filter id={`glow-${index}`}>
+                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
             </defs>
             <path
               d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
               fill={`url(#half-${index})`}
-              stroke="#FDB022"
+              stroke="#FFB800"
               strokeWidth="1"
+              filter={`url(#glow-${index})`}
             />
           </svg>
         ) : (
           <svg className={starSize} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id={`star-glow-${index}`}>
+                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
             <path
               d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-              fill={filled ? '#FDB022' : '#4B5563'}
-              stroke="#FDB022"
+              fill={filled ? '#FFB800' : '#2A2A2A'}
+              stroke="#FFB800"
               strokeWidth="1"
+              filter={filled ? `url(#star-glow-${index})` : 'none'}
+              className={filled ? 'drop-shadow-[0_0_4px_rgba(255,184,0,0.6)]' : ''}
             />
           </svg>
         )}

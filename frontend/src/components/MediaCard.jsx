@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import StarRating from './StarRating';
+import useEpisodes from '../hooks/useEpisodes';
 
 const CATEGORY_EMOJIS = {
   'Film': '🎬',
@@ -9,97 +11,128 @@ const CATEGORY_EMOJIS = {
 };
 
 const CATEGORY_COLORS = {
-  'Film': 'bg-purple-600',
-  'Dizi': 'bg-blue-600',
-  'Anime': 'bg-pink-600',
-  'Oyun': 'bg-green-600'
+  'Film': 'bg-purple-600/80',
+  'Dizi': 'bg-blue-600/80',
+  'Anime': 'bg-pink-600/80',
+  'Oyun': 'bg-green-600/80'
 };
 
 function MediaCard({ media, onDelete, onEdit }) {
   const [showMenu, setShowMenu] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const navigate = useNavigate();
+  const { episodes, loading: episodesLoading } = useEpisodes(media.id);
 
   const categoryEmoji = CATEGORY_EMOJIS[media.category] || '📁';
-  const categoryColor = CATEGORY_COLORS[media.category] || 'bg-gray-600';
+  const categoryColor = CATEGORY_COLORS[media.category] || 'bg-gray-600/80';
   const hasImage = media.imageUrl && !imageError;
+  
+  // Calculate episode stats
+  const episodeCount = episodes.length;
+  const episodeAvgRating = episodeCount > 0 && episodes.some(ep => ep.rating > 0)
+    ? (episodes.reduce((sum, ep) => sum + (ep.rating || 0), 0) / episodes.filter(ep => ep.rating > 0).length).toFixed(1)
+    : null;
+
+  // Puan bazlı glow class belirleme
+  const getGlowClass = () => {
+    if (media.rating >= 9) return 'masterpiece-glow';
+    if (media.rating >= 8) return 'excellent-glow';
+    if (media.rating >= 7) return 'good-glow';
+    return '';
+  };
+
+  const glowClass = getGlowClass();
+
+  const handleCardClick = (e) => {
+    // Don't navigate if clicking on menu buttons
+    if (e.target.closest('button')) {
+      return;
+    }
+    navigate(`/media/${media.id}`);
+  };
 
   return (
-    <div className="bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden">
+    <div 
+      onClick={handleCardClick}
+      className={`bg-dark-900 rounded-lg overflow-hidden transition-all duration-300 hover:scale-[1.02] cursor-pointer ${glowClass}`}
+    >
       {/* Poster/Image */}
-      {hasImage ? (
-        <div className="relative h-64 w-full overflow-hidden bg-gray-700">
-          <img
-            src={media.imageUrl}
-            alt={media.title}
-            onError={() => setImageError(true)}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-          />
-          <div className="absolute top-2 right-2">
-            <button
-              onClick={() => setShowMenu(!showMenu)}
-              className="bg-gray-900/80 hover:bg-gray-900 text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors"
-            >
-              ⋮
-            </button>
-            {showMenu && (
-              <div className="absolute right-0 mt-2 w-32 bg-gray-700 rounded-lg shadow-lg z-10">
-                <button
-                  onClick={() => {
-                    onEdit(media);
-                    setShowMenu(false);
-                  }}
-                  className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-600 rounded-t-lg"
-                >
-                  ✏️ Düzenle
-                </button>
-                <button
-                  onClick={() => {
-                    onDelete(media.id);
-                    setShowMenu(false);
-                  }}
-                  className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-600 rounded-b-lg"
-                >
-                  🗑️ Sil
-                </button>
-              </div>
-            )}
+      <div className="relative">
+        {hasImage ? (
+          <div className="relative h-64 w-full overflow-hidden bg-dark-850">
+            <img
+              src={media.imageUrl}
+              alt={media.title}
+              onError={() => setImageError(true)}
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+            />
+            <div className="absolute top-2 right-2">
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="bg-dark-950/90 hover:bg-dark-900 text-gold rounded-full w-8 h-8 flex items-center justify-center transition-colors"
+              >
+                ⋮
+              </button>
+              {showMenu && (
+                <div className="absolute right-0 mt-2 w-32 bg-dark-900 border border-gold/30 rounded-lg shadow-glow-sm z-10">
+                  <button
+                    onClick={() => {
+                      onEdit(media);
+                      setShowMenu(false);
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm text-gold hover:bg-dark-850 rounded-t-lg"
+                  >
+                    ✏️ Düzenle
+                  </button>
+                  <button
+                    onClick={() => {
+                      onDelete(media.id);
+                      setShowMenu(false);
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-dark-850 rounded-b-lg"
+                  >
+                    🗑️ Sil
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="relative h-64 w-full bg-gray-700 flex items-center justify-center">
-          <span className="text-6xl">{categoryEmoji}</span>
-          <div className="absolute top-2 right-2">
-            <button
-              onClick={() => setShowMenu(!showMenu)}
-              className="bg-gray-900/80 hover:bg-gray-900 text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors"
-            >
-              ⋮
-            </button>
-            {showMenu && (
-              <div className="absolute right-0 mt-2 w-32 bg-gray-700 rounded-lg shadow-lg z-10">
-                <button
-                  onClick={() => {
-                    onEdit(media);
-                    setShowMenu(false);
-                  }}
-                  className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-600 rounded-t-lg"
-                >
-                  ✏️ Düzenle
-                </button>
-                <button
-                  onClick={() => {
-                    onDelete(media.id);
-                    setShowMenu(false);
-                  }}
-                  className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-600 rounded-b-lg"
-                >
-                  🗑️ Sil
-                </button>
-              </div>
-            )}
+        ) : (
+          <div className="relative h-64 w-full bg-dark-850 flex items-center justify-center">
+            <span className="text-6xl">{categoryEmoji}</span>
+            <div className="absolute top-2 right-2">
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="bg-dark-950/90 hover:bg-dark-900 text-gold rounded-full w-8 h-8 flex items-center justify-center transition-colors"
+              >
+                ⋮
+              </button>
+              {showMenu && (
+                <div className="absolute right-0 mt-2 w-32 bg-dark-900 border border-gold/30 rounded-lg shadow-glow-sm z-10">
+                  <button
+                    onClick={() => {
+                      onEdit(media);
+                      setShowMenu(false);
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm text-gold hover:bg-dark-850 rounded-t-lg"
+                  >
+                    ✏️ Düzenle
+                  </button>
+                  <button
+                    onClick={() => {
+                      onDelete(media.id);
+                      setShowMenu(false);
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-dark-850 rounded-b-lg"
+                  >
+                    🗑️ Sil
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Content */}
       <div className="p-4">
@@ -120,6 +153,22 @@ function MediaCard({ media, onDelete, onEdit }) {
         <div className="mb-3">
           <StarRating value={media.rating} readonly size="sm" />
         </div>
+
+        {/* Episode Stats */}
+        {episodeCount > 0 && (
+          <div className="mb-3 flex items-center gap-3 text-sm">
+            <div className="flex items-center gap-1 text-gold">
+              <span>📝</span>
+              <span className="font-semibold">{episodeCount} Bölüm</span>
+            </div>
+            {episodeAvgRating && (
+              <div className="flex items-center gap-1 text-gold/80">
+                <span>⭐</span>
+                <span>{episodeAvgRating}/10</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Notes */}
         {media.notes && (

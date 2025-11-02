@@ -75,19 +75,19 @@ function Dashboard() {
   }, {});
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-dark-950 text-white">
       {/* Navigation */}
-      <nav className="bg-gray-800 shadow-lg">
+      <nav className="bg-dark-950 shadow-glow border-b-2 border-gold">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-3">
-            <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="Logo" className="w-10 h-10" />
-            <h1 className="text-2xl font-bold">Medya Takip Sistemim</h1>
+            <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="Logo" className="w-10 h-10 drop-shadow-[0_0_10px_rgba(255,184,0,0.5)]" />
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-gold to-gold-light bg-clip-text text-transparent">Medya Takip Sistemim</h1>
           </div>
           <div className="flex items-center space-x-4">
-            <span className="text-gray-300 hidden sm:block">{currentUser?.email}</span>
+            <span className="text-gold hidden sm:block">{currentUser?.email}</span>
             <button
               onClick={handleLogout}
-              className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition duration-200"
+              className="bg-dark-900 hover:bg-dark-850 border border-red-500 text-red-400 hover:text-red-300 px-4 py-2 rounded-lg transition-all duration-300 hover:shadow-[0_0_15px_rgba(239,68,68,0.5)]"
             >
               Çıkış Yap
             </button>
@@ -98,19 +98,19 @@ function Dashboard() {
       <div className="container mx-auto px-4 py-8">
         {/* Statistics */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-gray-800 rounded-lg p-4">
+          <div className="bg-dark-900 border border-gold/30 rounded-lg p-4 hover:border-gold hover:shadow-glow-sm transition-all duration-300">
             <div className="text-gray-400 text-sm">Toplam</div>
-            <div className="text-3xl font-bold text-white">{stats.total}</div>
+            <div className="text-3xl font-bold text-gold">{stats.total}</div>
           </div>
           {categories.slice(0, 2).map((cat) => (
-            <div key={cat} className="bg-gray-800 rounded-lg p-4">
+            <div key={cat} className="bg-dark-900 border border-gold/30 rounded-lg p-4 hover:border-gold hover:shadow-glow-sm transition-all duration-300">
               <div className="text-gray-400 text-sm">{cat}</div>
-              <div className="text-3xl font-bold text-white">{categoryStats[cat]}</div>
+              <div className="text-3xl font-bold text-gold">{categoryStats[cat]}</div>
             </div>
           ))}
-          <div className="bg-gray-800 rounded-lg p-4">
+          <div className="bg-dark-900 border border-gold/30 rounded-lg p-4 hover:border-gold hover:shadow-glow-sm transition-all duration-300">
             <div className="text-gray-400 text-sm">Ortalama Puan</div>
-            <div className="text-3xl font-bold text-yellow-400">{stats.avgRating}</div>
+            <div className="text-3xl font-bold text-gold">{stats.avgRating}</div>
           </div>
         </div>
 
@@ -119,7 +119,7 @@ function Dashboard() {
           {!showForm ? (
             <button
               onClick={() => setShowForm(true)}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 rounded-lg transition duration-200 flex items-center justify-center gap-2"
+              className="w-full btn-primary py-4 flex items-center justify-center gap-2 text-lg"
             >
               <span className="text-2xl">➕</span>
               <span>Yeni Medya Ekle</span>
@@ -135,7 +135,7 @@ function Dashboard() {
               {!editingItem && (
                 <button
                   onClick={() => setShowForm(false)}
-                  className="w-full mt-4 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-lg transition duration-200"
+                  className="w-full mt-4 btn-secondary py-3"
                 >
                   ✕ Kapat
                 </button>
@@ -149,10 +149,10 @@ function Dashboard() {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg transition duration-200 ${
+              className={`px-4 py-2 rounded-lg transition-all duration-300 ${
                 filter === 'all'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                  ? 'bg-gold text-black font-bold shadow-glow'
+                  : 'bg-dark-900 border border-gold/30 text-gold hover:border-gold hover:shadow-glow-sm'
               }`}
             >
               Tümü ({mediaItems.length})
@@ -161,10 +161,10 @@ function Dashboard() {
               <button
                 key={cat}
                 onClick={() => setFilter(cat)}
-                className={`px-4 py-2 rounded-lg transition duration-200 ${
+                className={`px-4 py-2 rounded-lg transition-all duration-300 ${
                   filter === cat
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                    ? 'bg-gold text-black font-bold shadow-glow'
+                    : 'bg-dark-900 border border-gold/30 text-gold hover:border-gold hover:shadow-glow-sm'
                 }`}
               >
                 {cat} ({categoryStats[cat]})
@@ -186,8 +186,8 @@ function Dashboard() {
                 }, 100);
               }
             }}
-            placeholder="🔍 Ara... (Enter = Yeni Ekle)"
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="🔍 Ara... (Enter = Yeni Ekle)"
+          className="w-full px-4 py-3 bg-dark-900 border border-gold/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gold focus:shadow-glow-sm transition-all duration-300"
           />
         </div>
 

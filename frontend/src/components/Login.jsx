@@ -20,15 +20,15 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
-      <div className="max-w-md w-full bg-gray-800 rounded-lg shadow-xl p-8">
+    <div className="min-h-screen bg-dark-950 flex items-center justify-center px-4">
+      <div className="max-w-md w-full bg-dark-900 border-2 border-gold rounded-lg shadow-glow-lg p-8">
         <div className="text-center mb-8">
           <img 
             src={`${import.meta.env.BASE_URL}logo.svg`}
             alt="Logo" 
-            className="w-24 h-24 mx-auto mb-4"
+            className="w-24 h-24 mx-auto mb-4 drop-shadow-[0_0_20px_rgba(255,184,0,0.8)] animate-pulseGlow"
           />
-          <h2 className="text-3xl font-bold text-white mb-2">
+          <h2 className="text-3xl font-bold text-gold mb-2">
             Giriş Yap
           </h2>
           <p className="text-gray-400">
@@ -45,7 +45,7 @@ function Login() {
         <button
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full bg-white hover:bg-gray-100 text-gray-900 font-semibold py-4 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg"
+          className="w-full bg-white hover:bg-gold text-gray-900 font-semibold py-4 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 hover:shadow-glow"
         >
           <svg className="w-6 h-6" viewBox="0 0 24 24">
             <path
@@ -70,8 +70,8 @@ function Login() {
           </span>
         </button>
 
-        <p className="text-gray-500 text-sm text-center mt-6">
-          Google hesabınızla güvenli bir şekilde giriş yapın
+        <p className="text-gray-400 text-sm text-center mt-6">
+          Google hesabınızla <span className="text-gold font-semibold">güvenli</span> bir şekilde giriş yapın
         </p>
       </div>
     </div>

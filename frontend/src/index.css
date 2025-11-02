@@ -2,7 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  min-height: 100vh;
+@layer base {
+  body {
+    margin: 0;
+    min-height: 100vh;
+    @apply bg-dark-950 text-white;
+  }
+}
+
+@layer components {
+  /* Glow effect classes */
+  .masterpiece-glow {
+    @apply border-2 border-gold shadow-glow-lg;
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+  
+  .excellent-glow {
+    @apply border border-gold shadow-glow;
+  }
+  
+  .good-glow {
+    @apply border border-gold/30 shadow-glow-sm;
+  }
+  
+  /* Button styles */
+  .btn-primary {
+    @apply bg-gold hover:bg-gold-light text-black font-semibold py-2 px-4 rounded-lg transition-all duration-300 hover:shadow-glow;
+  }
+  
+  .btn-secondary {
+    @apply bg-dark-900 hover:bg-dark-850 border border-gold text-gold font-semibold py-2 px-4 rounded-lg transition-all duration-300 hover:shadow-glow-sm;
+  }
 }
