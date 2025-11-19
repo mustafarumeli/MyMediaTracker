@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['logo.svg', 'favicon.ico'],
+      includeAssets: ['logo.svg', 'favicon.ico', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
         name: 'MyMediaTracker',
         short_name: 'MediaTracker',
@@ -39,7 +39,14 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,jpg,jpeg}'],
+        // İlk yüklemede tüm statik dosyaları cache'le
+        navigateFallback: '/MyMediaTracker/index.html',
+        navigateFallbackDenylist: [/^\/api/],
+        cleanupOutdatedCaches: true,
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
+          // Firebase Storage - resimler için
           {
             urlPattern: /^https:\/\/firebasestorage\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
@@ -54,6 +61,7 @@ export default defineConfig({
               }
             }
           },
+          // Firebase API - Firestore istekleri
           {
             urlPattern: /^https:\/\/firestore\.googleapis\.com\/.*/i,
             handler: 'NetworkFirst',
@@ -62,7 +70,36 @@ export default defineConfig({
               networkTimeoutSeconds: 10,
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 60 * 5 // 5 dakika
+                maxAgeSeconds: 60 * 60 * 24 // 1 gün
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          // Firebase Auth
+          {
+            urlPattern: /^https:\/\/(www\.)?googleapis\.com\/identitytoolkit\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'firebase-auth-cache',
+              networkTimeoutSeconds: 10,
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 // 1 saat
+              }
+            }
+          },
+          // Diğer external istekler
+          {
+            urlPattern: /^https?:\/\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'external-cache',
+              networkTimeoutSeconds: 10,
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 // 1 gün
               }
             }
           }
