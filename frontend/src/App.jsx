@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import MediaDetail from './components/MediaDetail';
+import AnimeStats from './components/AnimeStats';
 import './App.css';
 
 function ProtectedRoute({ children }) {
@@ -41,6 +42,11 @@ function AppContent() {
       <Route path="/media/:id" element={
         <ProtectedRoute>
           <MediaDetail />
+        </ProtectedRoute>
+      } />
+      <Route path="/stats" element={
+        <ProtectedRoute>
+          <AnimeStats />
         </ProtectedRoute>
       } />
     </Routes>

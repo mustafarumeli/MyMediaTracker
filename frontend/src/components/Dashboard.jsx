@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useMediaItems } from '../hooks/useMediaItems';
 import MediaForm from './MediaForm';
@@ -7,6 +8,7 @@ import MediaTable from './MediaTable';
 import { exportMediaData } from '../utils/exportData';
 
 function Dashboard() {
+  const navigate = useNavigate();
   const { currentUser, logout } = useAuth();
   const { mediaItems, loading, addMediaItem, updateMediaItem, deleteMediaItem } = useMediaItems();
   const [editingItem, setEditingItem] = useState(null);
@@ -108,6 +110,14 @@ function Dashboard() {
             <h1 className="text-2xl font-bold bg-gradient-to-r from-gold to-gold-light bg-clip-text text-transparent">Medya Takip Sistemim</h1>
           </div>
           <div className="flex items-center space-x-4">
+            <button
+              onClick={() => navigate('/stats')}
+              className="bg-dark-900 hover:bg-gold/20 border border-gold text-gold px-4 py-2 rounded-lg transition-all duration-300 hover:shadow-glow-sm flex items-center gap-2"
+              title="Anime İstatistikleri"
+            >
+              <span>📊</span>
+              <span className="hidden sm:inline">İstatistikler</span>
+            </button>
             <button
               onClick={handleExport}
               disabled={exporting || mediaItems.length === 0}
