@@ -101,7 +101,7 @@ function AnimeStats() {
 
       <div className="container mx-auto px-4 py-8">
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <StatCard
             icon="🎌"
             title="Toplam Anime"
@@ -119,12 +119,6 @@ function AnimeStats() {
             title="Ortalama MAL Puanı"
             value={stats.avgMalScore}
             subtitle={`${stats.animesWithMalData} anime`}
-          />
-          <StatCard
-            icon="📺"
-            title="Toplam Bölüm"
-            value={stats.totalEpisodes}
-            subtitle="İzlenen"
           />
         </div>
 
@@ -208,35 +202,6 @@ function AnimeStats() {
           </p>
           <TimelineChart data={stats.monthlyTrend} />
         </div>
-
-        {/* Top Episode Counts */}
-        {stats.topEpisodeCounts && stats.topEpisodeCounts.length > 0 && (
-          <div className="bg-dark-900 border-2 border-gold/30 rounded-lg p-6 mb-8">
-            <h2 className="text-2xl font-bold text-gold mb-4 flex items-center gap-2">
-              <span>📝</span>
-              <span>En Çok Bölümlü Animeler</span>
-            </h2>
-            <p className="text-gray-400 text-sm mb-6">
-              Hangi animelerde daha çok bölüm takip ediyorum
-            </p>
-            <div className="space-y-3">
-              {stats.topEpisodeCounts.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between bg-dark-950 border border-gold/20 rounded-lg p-4 hover:border-gold/50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl font-bold text-gold/50">#{index + 1}</span>
-                    <span className="text-white font-medium">{item.title}</span>
-                  </div>
-                  <span className="text-gold font-bold text-lg">
-                    {item.episodes} Bölüm
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

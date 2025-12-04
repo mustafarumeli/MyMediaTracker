@@ -39,7 +39,7 @@ function ScoreComparisonChart({ data }) {
           iconType="circle"
         />
         <Bar dataKey="myScore" fill="#FFB800" name="Benim Puanım" />
-        <Bar dataKey="malScore" fill="#4A90E2" name="MAL Puanı" />
+        <Bar dataKey="malScore" fill="#EF4444" name="MAL Puanı" />
       </BarChart>
     </ResponsiveContainer>
   );
