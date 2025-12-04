@@ -4,9 +4,14 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useAuth } from '../contexts/AuthContext';
 import useEpisodes from '../hooks/useEpisodes';
+import { useMediaItems } from '../hooks/useMediaItems';
+import { getAnimeDetails } from '../services/jikanApi';
+import { checkDuplicateAnime } from '../utils/checkDuplicate';
 import StarRating from './StarRating';
 import EpisodeForm from './EpisodeForm';
 import EpisodeList from './EpisodeList';
+import JikanSearchModal from './JikanSearchModal';
+import MalInfoSection from './MalInfoSection';
 
 const CATEGORY_EMOJIS = {
   'Film': '🎬',
@@ -23,6 +28,8 @@ function MediaDetail() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingEpisode, setEditingEpisode] = useState(null);
+  const [showJikanModal, setShowJikanModal] = useState(false);
+  const [jikanLoading, setJikanLoading] = useState(false);
   
   const { 
     episodes, 
@@ -31,6 +38,8 @@ function MediaDetail() {
     updateEpisode, 
     deleteEpisode 
   } = useEpisodes(id);
+
+  const { updateMediaWithJikanData } = useMediaItems();
 
   // Fetch media data
   useEffect(() => {
@@ -102,6 +111,53 @@ function MediaDetail() {
     setEditingEpisode(null);
   };
 
+  const handleJikanSearch = () => {
+    setShowJikanModal(true);
+  };
+
+  const handleJikanSelect = async (selectedAnime) => {
+    setJikanLoading(true);
+    
+    try {
+      // Get detailed information
+      const details = await getAnimeDetails(selectedAnime.malId);
+      
+      // Check for duplicates
+      const duplicate = await checkDuplicateAnime(details.malId, id);
+      
+      if (duplicate) {
+        const confirmUpdate = window.confirm(
+          `Bu anime zaten kayıtlı: "${duplicate.title}"\n\nYine de bu medyaya MAL bilgilerini eklemek istiyor musunuz?`
+        );
+        
+        if (!confirmUpdate) {
+          setJikanLoading(false);
+          return;
+        }
+      }
+
+      // Update media with Jikan data
+      await updateMediaWithJikanData(id, {
+        ...details,
+        skipImageUpdate: media.imageUrl && media.imageUrl.length > 0 // Don't override if user has custom image
+      });
+
+      // Refresh media data
+      const mediaRef = doc(db, `media-items/${id}`);
+      const mediaSnap = await getDoc(mediaRef);
+      if (mediaSnap.exists()) {
+        setMedia({ id: mediaSnap.id, ...mediaSnap.data() });
+      }
+
+      alert('✅ MAL bilgileri başarıyla eklendi!');
+    } catch (error) {
+      console.error('Error fetching Jikan data:', error);
+      alert('❌ MAL bilgileri alınırken bir hata oluştu. Lütfen tekrar deneyin.');
+    } finally {
+      setJikanLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-dark-950 flex items-center justify-center">
@@ -136,19 +192,44 @@ function MediaDetail() {
         <div className="bg-dark-900 border-2 border-gold rounded-lg overflow-hidden shadow-glow-lg mb-8">
           <div className="md:flex">
             {/* Poster */}
-            {media.imageUrl ? (
-              <div className="md:w-1/3 h-64 md:h-auto">
-                <img
-                  src={media.imageUrl}
-                  alt={media.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ) : (
-              <div className="md:w-1/3 h-64 md:h-auto bg-dark-850 flex items-center justify-center">
-                <span className="text-8xl">{categoryEmoji}</span>
-              </div>
-            )}
+            <div className="md:w-1/3 relative">
+              {media.imageUrl ? (
+                <div className="h-64 md:h-auto">
+                  <img
+                    src={media.imageUrl}
+                    alt={media.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="h-64 md:h-auto bg-dark-850 flex items-center justify-center">
+                  <span className="text-8xl">{categoryEmoji}</span>
+                </div>
+              )}
+              
+              {/* Jikan Button - Only for Anime */}
+              {media.category === 'Anime' && (
+                <div className="p-4">
+                  <button
+                    onClick={handleJikanSearch}
+                    disabled={jikanLoading}
+                    className="w-full btn-primary py-3 px-4 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {jikanLoading ? (
+                      <>
+                        <span className="animate-spin">⏳</span>
+                        <span>Yükleniyor...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-xl">🔍</span>
+                        <span>Jikan&apos;dan Bilgi Çek</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
 
             {/* Info */}
             <div className="md:w-2/3 p-6">
@@ -174,6 +255,9 @@ function MediaDetail() {
                   <p className="text-gray-300">{media.notes}</p>
                 </div>
               )}
+
+              {/* MAL Info Section */}
+              <MalInfoSection media={media} />
 
               {episodes.length > 0 && (
                 <div className="mt-6 pt-6 border-t border-gold/30">
@@ -240,6 +324,14 @@ function MediaDetail() {
           )}
         </div>
       </div>
+
+      {/* Jikan Search Modal */}
+      <JikanSearchModal
+        isOpen={showJikanModal}
+        onClose={() => setShowJikanModal(false)}
+        onSelect={handleJikanSelect}
+        initialQuery={media?.title || ''}
+      />
     </div>
   );
 }

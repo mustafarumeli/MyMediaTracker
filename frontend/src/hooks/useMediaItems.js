@@ -78,13 +78,39 @@ export function useMediaItems() {
     }
   };
 
+  const updateMediaWithJikanData = async (id, jikanData) => {
+    try {
+      const mediaRef = doc(db, 'media-items', id);
+      await updateDoc(mediaRef, {
+        malId: jikanData.malId || null,
+        originalTitle: jikanData.originalTitle || null,
+        malScore: jikanData.malScore || null,
+        synopsis: jikanData.synopsis || null,
+        totalEpisodes: jikanData.totalEpisodes || null,
+        airedFrom: jikanData.airedFrom || null,
+        studios: jikanData.studios || null,
+        genres: jikanData.genres || null,
+        // Optionally update the image if Jikan has a better one and current is empty
+        ...(jikanData.imageUrl && !jikanData.skipImageUpdate ? {
+          imageUrl: jikanData.imageUrl,
+          imageType: 'url'
+        } : {}),
+        updatedAt: serverTimestamp()
+      });
+    } catch (err) {
+      console.error('Error updating media with Jikan data:', err);
+      throw err;
+    }
+  };
+
   return {
     mediaItems,
     loading,
     error,
     addMediaItem,
     updateMediaItem,
-    deleteMediaItem
+    deleteMediaItem,
+    updateMediaWithJikanData
   };
 }
 

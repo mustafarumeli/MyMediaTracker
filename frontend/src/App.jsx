@@ -9,7 +9,7 @@ function ProtectedRoute({ children }) {
   const { currentUser, loading } = useAuth();
   
   if (loading) {
-    return (
+  return (
       <div className="min-h-screen bg-dark-950 flex items-center justify-center">
         <div className="text-gold text-xl">Yükleniyor...</div>
       </div>
