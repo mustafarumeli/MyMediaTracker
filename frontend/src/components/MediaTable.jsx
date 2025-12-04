@@ -52,7 +52,32 @@ function MediaTableRow({ media, onDelete, onEdit }) {
 
       {/* Başlık */}
       <td className="p-3">
-        <div className="font-semibold text-white">{media.title}</div>
+        <div className="font-semibold text-white mb-1">{media.title}</div>
+        
+        {/* MAL Pills */}
+        <div className="flex flex-wrap gap-1.5 mt-1">
+          {/* MAL Score */}
+          {media.malScore && (
+            <span className="bg-gold/20 border border-gold/50 text-gold px-2 py-0.5 rounded-full text-xs font-bold inline-flex items-center gap-1">
+              <span>⭐</span>
+              <span>{media.malScore.toFixed(1)}</span>
+            </span>
+          )}
+          
+          {/* Original Title (truncated) */}
+          {media.originalTitle && media.originalTitle !== media.title && (
+            <span className="bg-dark-850 border border-gold/20 text-gray-300 px-2 py-0.5 rounded-full text-xs max-w-[200px] truncate">
+              🎌 {media.originalTitle}
+            </span>
+          )}
+          
+          {/* First Genre */}
+          {media.genres && media.genres.length > 0 && (
+            <span className="bg-dark-850 border border-gold/20 text-gold/80 px-2 py-0.5 rounded-full text-xs">
+              {media.genres[0]}
+            </span>
+          )}
+        </div>
       </td>
 
       {/* Kategori */}

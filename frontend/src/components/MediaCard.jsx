@@ -136,18 +136,55 @@ function MediaCard({ media, onDelete, onEdit }) {
 
       {/* Content */}
       <div className="p-4">
-        {/* Category badge */}
-        <div className="flex items-center justify-between mb-2">
+        {/* Category badge and MAL Info */}
+        <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
           <span className={`${categoryColor} text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1`}>
             <span>{categoryEmoji}</span>
             <span>{media.category}</span>
           </span>
+          
+          {/* MAL Score Badge */}
+          {media.malScore && (
+            <span className="bg-gold/20 border border-gold/50 text-gold px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+              <span>⭐</span>
+              <span>{media.malScore.toFixed(1)}</span>
+            </span>
+          )}
         </div>
 
         {/* Title */}
         <h3 className="text-xl font-bold text-white mb-3 line-clamp-2">
           {media.title}
         </h3>
+
+        {/* MAL Pills - Original Title & Genres */}
+        {(media.originalTitle || (media.genres && media.genres.length > 0)) && (
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            {/* Original Title */}
+            {media.originalTitle && media.originalTitle !== media.title && (
+              <span className="bg-dark-850 border border-gold/20 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                🎌 {media.originalTitle}
+              </span>
+            )}
+            
+            {/* Genres - Show max 3 */}
+            {media.genres && media.genres.slice(0, 3).map((genre, index) => (
+              <span 
+                key={index}
+                className="bg-dark-850 border border-gold/20 text-gold/80 px-2 py-0.5 rounded-full text-xs"
+              >
+                {genre}
+              </span>
+            ))}
+            
+            {/* More genres indicator */}
+            {media.genres && media.genres.length > 3 && (
+              <span className="bg-dark-850 border border-gold/20 text-gray-400 px-2 py-0.5 rounded-full text-xs">
+                +{media.genres.length - 3}
+              </span>
+            )}
+          </div>
+        )}
         
         {/* Star Rating */}
         <div className="mb-3">

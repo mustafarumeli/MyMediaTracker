@@ -207,8 +207,8 @@ function MediaDetail() {
                 </div>
               )}
               
-              {/* Jikan Button - Only for Anime */}
-              {media.category === 'Anime' && (
+              {/* Jikan Button - Only for Anime without MAL data */}
+              {media.category === 'Anime' && !media.malId && (
                 <div className="p-4">
                   <button
                     onClick={handleJikanSearch}
