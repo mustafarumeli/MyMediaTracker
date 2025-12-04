@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useMediaItems } from '../hooks/useMediaItems';
 import MediaForm from './MediaForm';
 import MediaList from './MediaList';
 import MediaTable from './MediaTable';
+import ConfirmDeleteModal from './ConfirmDeleteModal';
 import { exportMediaData } from '../utils/exportData';
 
 function Dashboard() {
@@ -19,6 +21,9 @@ function Dashboard() {
     return localStorage.getItem('viewMode') || 'grid';
   });
   const [exporting, setExporting] = useState(false);
+  const [sortBy, setSortBy] = useState('newest'); // newest, oldest, highest, lowest, az, za
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, media: null });
+  const [deleting, setDeleting] = useState(false);
 
   // Save view mode to localStorage
   useEffect(() => {
@@ -37,31 +42,82 @@ function Dashboard() {
     try {
       setExporting(true);
       const result = await exportMediaData(currentUser);
-      alert(`✅ ${result.count} medya başarıyla export edildi!\nDosya: ${result.filename}`);
+      toast.success(`${result.count} medya başarıyla export edildi! 💾\nDosya: ${result.filename}`, {
+        duration: 4000,
+        position: 'bottom-right'
+      });
     } catch (error) {
       console.error('Export error:', error);
-      alert('❌ Export sırasında bir hata oluştu.');
+      toast.error('Export sırasında bir hata oluştu.', {
+        duration: 3000,
+        position: 'bottom-right'
+      });
     } finally {
       setExporting(false);
     }
   }
 
   async function handleAddMedia(mediaData) {
-    await addMediaItem(mediaData);
-    setShowForm(false);
+    try {
+      await addMediaItem(mediaData);
+      setShowForm(false);
+      toast.success(`${mediaData.title} başarıyla eklendi! ✨`, {
+        duration: 3000,
+        position: 'bottom-right'
+      });
+    } catch (error) {
+      console.error('Add error:', error);
+      toast.error('Medya eklenirken bir hata oluştu.', {
+        duration: 3000,
+        position: 'bottom-right'
+      });
+    }
   }
 
   async function handleUpdateMedia(mediaData) {
     if (editingItem) {
-      await updateMediaItem(editingItem.id, mediaData);
-      setEditingItem(null);
-      setShowForm(false);
+      try {
+        await updateMediaItem(editingItem.id, mediaData);
+        setEditingItem(null);
+        setShowForm(false);
+        toast.success(`${mediaData.title} güncellendi! 🔄`, {
+          duration: 3000,
+          position: 'bottom-right'
+        });
+      } catch (error) {
+        console.error('Update error:', error);
+        toast.error('Medya güncellenirken bir hata oluştu.', {
+          duration: 3000,
+          position: 'bottom-right'
+        });
+      }
     }
   }
 
-  async function handleDeleteMedia(id) {
-    if (window.confirm('Silmek istediğinizden emin misiniz?')) {
-      await deleteMediaItem(id);
+  function handleDeleteMedia(id) {
+    const media = mediaItems.find(item => item.id === id);
+    setDeleteModal({ isOpen: true, media });
+  }
+
+  async function confirmDelete() {
+    if (!deleteModal.media) return;
+    
+    setDeleting(true);
+    try {
+      await deleteMediaItem(deleteModal.media.id);
+      toast.success(`${deleteModal.media.title} silindi! 🗑️`, {
+        duration: 3000,
+        position: 'bottom-right'
+      });
+      setDeleteModal({ isOpen: false, media: null });
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast.error('Medya silinirken bir hata oluştu.', {
+        duration: 3000,
+        position: 'bottom-right'
+      });
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -86,6 +142,28 @@ function Dashboard() {
     return matchesFilter && matchesSearch;
   });
 
+  // Sort media
+  const sortedMedia = useMemo(() => {
+    const sorted = [...filteredMedia];
+    
+    switch (sortBy) {
+      case 'newest':
+        return sorted.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+      case 'oldest':
+        return sorted.sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
+      case 'highest':
+        return sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      case 'lowest':
+        return sorted.sort((a, b) => (a.rating || 0) - (b.rating || 0));
+      case 'az':
+        return sorted.sort((a, b) => a.title.localeCompare(b.title, 'tr'));
+      case 'za':
+        return sorted.sort((a, b) => b.title.localeCompare(a.title, 'tr'));
+      default:
+        return sorted;
+    }
+  }, [filteredMedia, sortBy]);
+
   // Statistics
   const stats = {
     total: mediaItems.length,
@@ -102,6 +180,39 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-dark-950 text-white">
+      {/* Toast Container */}
+      <Toaster
+        toastOptions={{
+          style: {
+            background: '#1a1a1a',
+            color: '#fff',
+            border: '1px solid #FFB800',
+            borderRadius: '8px',
+          },
+          success: {
+            iconTheme: {
+              primary: '#FFB800',
+              secondary: '#1a1a1a',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#EF4444',
+              secondary: '#1a1a1a',
+            },
+          },
+        }}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, media: null })}
+        onConfirm={confirmDelete}
+        media={deleteModal.media}
+        loading={deleting}
+      />
+
       {/* Navigation */}
       <nav className="bg-dark-950 shadow-glow border-b-2 border-gold">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -187,9 +298,10 @@ function Dashboard() {
           )}
         </div>
 
-        {/* Filter and Search */}
+        {/* Filter, Sort and Search */}
         <div className="mb-6 space-y-4">
-          <div className="flex flex-wrap gap-2 items-center">
+          <div className="flex flex-wrap gap-2 items-center justify-between">
+            <div className="flex flex-wrap gap-2 items-center">
             {/* Category Filters */}
             <button
               onClick={() => setFilter('all')}
@@ -266,14 +378,14 @@ function Dashboard() {
         {/* Media List/Table */}
         {viewMode === 'grid' ? (
           <MediaList
-            media={filteredMedia}
+            media={sortedMedia}
             loading={loading}
             onDelete={handleDeleteMedia}
             onEdit={handleEditMedia}
           />
         ) : (
           <MediaTable
-            mediaItems={filteredMedia}
+            mediaItems={sortedMedia}
             onDelete={handleDeleteMedia}
             onEdit={handleEditMedia}
           />

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useAuth } from '../contexts/AuthContext';
@@ -12,6 +13,7 @@ import EpisodeForm from './EpisodeForm';
 import EpisodeList from './EpisodeList';
 import JikanSearchModal from './JikanSearchModal';
 import MalInfoSection from './MalInfoSection';
+import ConfirmDeleteModal from './ConfirmDeleteModal';
 
 const CATEGORY_EMOJIS = {
   'Film': '🎬',
@@ -30,6 +32,8 @@ function MediaDetail() {
   const [editingEpisode, setEditingEpisode] = useState(null);
   const [showJikanModal, setShowJikanModal] = useState(false);
   const [jikanLoading, setJikanLoading] = useState(false);
+  const [deleteEpisodeModal, setDeleteEpisodeModal] = useState({ isOpen: false, episode: null });
+  const [deletingEpisode, setDeletingEpisode] = useState(false);
   
   const { 
     episodes, 
@@ -73,9 +77,16 @@ function MediaDetail() {
     try {
       await addEpisode(episodeData);
       setShowForm(false);
+      toast.success('Bölüm başarıyla eklendi! 📝', {
+        duration: 3000,
+        position: 'bottom-right'
+      });
     } catch (error) {
       console.error('Error adding episode:', error);
-      alert('Bölüm eklenirken bir hata oluştu');
+      toast.error('Bölüm eklenirken bir hata oluştu.', {
+        duration: 3000,
+        position: 'bottom-right'
+      });
     }
   };
 
@@ -86,9 +97,16 @@ function MediaDetail() {
       await updateEpisode(editingEpisode.id, episodeData);
       setEditingEpisode(null);
       setShowForm(false);
+      toast.success('Bölüm güncellendi! 🔄', {
+        duration: 3000,
+        position: 'bottom-right'
+      });
     } catch (error) {
       console.error('Error updating episode:', error);
-      alert('Bölüm güncellenirken bir hata oluştu');
+      toast.error('Bölüm güncellenirken bir hata oluştu.', {
+        duration: 3000,
+        position: 'bottom-right'
+      });
     }
   };
 
@@ -97,12 +115,29 @@ function MediaDetail() {
     setShowForm(true);
   };
 
-  const handleDeleteEpisode = async (episodeId) => {
+  const handleDeleteEpisode = (episode) => {
+    setDeleteEpisodeModal({ isOpen: true, episode });
+  };
+
+  const confirmDeleteEpisode = async () => {
+    if (!deleteEpisodeModal.episode) return;
+    
+    setDeletingEpisode(true);
     try {
-      await deleteEpisode(episodeId);
+      await deleteEpisode(deleteEpisodeModal.episode.id);
+      toast.success('Bölüm silindi! 🗑️', {
+        duration: 3000,
+        position: 'bottom-right'
+      });
+      setDeleteEpisodeModal({ isOpen: false, episode: null });
     } catch (error) {
       console.error('Error deleting episode:', error);
-      alert('Bölüm silinirken bir hata oluştu');
+      toast.error('Bölüm silinirken bir hata oluştu.', {
+        duration: 3000,
+        position: 'bottom-right'
+      });
+    } finally {
+      setDeletingEpisode(false);
     }
   };
 
@@ -126,14 +161,12 @@ function MediaDetail() {
       const duplicate = await checkDuplicateAnime(details.malId, id);
       
       if (duplicate) {
-        const confirmUpdate = window.confirm(
-          `Bu anime zaten kayıtlı: "${duplicate.title}"\n\nYine de bu medyaya MAL bilgilerini eklemek istiyor musunuz?`
-        );
-        
-        if (!confirmUpdate) {
-          setJikanLoading(false);
-          return;
-        }
+        toast.error(`Bu anime zaten kayıtlı: "${duplicate.title}"`, {
+          duration: 4000,
+          position: 'bottom-right'
+        });
+        setJikanLoading(false);
+        return;
       }
 
       // Update media with Jikan data
@@ -149,10 +182,16 @@ function MediaDetail() {
         setMedia({ id: mediaSnap.id, ...mediaSnap.data() });
       }
 
-      alert('✅ MAL bilgileri başarıyla eklendi!');
+      toast.success('MAL bilgileri başarıyla eklendi! ✅', {
+        duration: 3000,
+        position: 'bottom-right'
+      });
     } catch (error) {
       console.error('Error fetching Jikan data:', error);
-      alert('❌ MAL bilgileri alınırken bir hata oluştu. Lütfen tekrar deneyin.');
+      toast.error('MAL bilgileri alınırken bir hata oluştu.', {
+        duration: 3000,
+        position: 'bottom-right'
+      });
     } finally {
       setJikanLoading(false);
     }
@@ -174,6 +213,44 @@ function MediaDetail() {
 
   return (
     <div className="min-h-screen bg-dark-950 text-white">
+      {/* Toast Container */}
+      <Toaster
+        toastOptions={{
+          style: {
+            background: '#1a1a1a',
+            color: '#fff',
+            border: '1px solid #FFB800',
+            borderRadius: '8px',
+          },
+          success: {
+            iconTheme: {
+              primary: '#FFB800',
+              secondary: '#1a1a1a',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#EF4444',
+              secondary: '#1a1a1a',
+            },
+          },
+        }}
+      />
+
+      {/* Delete Episode Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={deleteEpisodeModal.isOpen}
+        onClose={() => setDeleteEpisodeModal({ isOpen: false, episode: null })}
+        onConfirm={confirmDeleteEpisode}
+        media={deleteEpisodeModal.episode ? {
+          title: `S${deleteEpisodeModal.episode.seasonNumber}E${deleteEpisodeModal.episode.episodeNumber}${deleteEpisodeModal.episode.title ? ` - ${deleteEpisodeModal.episode.title}` : ''}`,
+          category: 'Bölüm',
+          rating: deleteEpisodeModal.episode.rating || 0,
+          imageUrl: null
+        } : null}
+        loading={deletingEpisode}
+      />
+
       {/* Header */}
       <nav className="bg-dark-950 shadow-glow border-b-2 border-gold">
         <div className="container mx-auto px-4 py-4">

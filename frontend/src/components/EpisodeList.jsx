@@ -115,11 +115,7 @@ function EpisodeList({ episodes, onEdit, onDelete }) {
                           ✏️
                         </button>
                         <button
-                          onClick={() => {
-                            if (window.confirm('Bu bölümü silmek istediğinize emin misiniz?')) {
-                              onDelete(episode.id);
-                            }
-                          }}
+                          onClick={() => onDelete(episode)}
                           className="px-3 py-1 bg-dark-850 hover:bg-red-500/20 border border-red-500/30 text-red-400 rounded transition-colors duration-200 text-sm"
                         >
                           🗑️
