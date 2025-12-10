@@ -356,9 +356,10 @@ function Dashboard() {
                 {cat} ({categoryStats[cat]})
               </button>
             ))}
+            </div>
 
             {/* View Mode Toggle */}
-            <div className="flex gap-2 ml-auto">
+            <div className="flex gap-2">
               <button
                 onClick={() => setViewMode('grid')}
                 className={`px-4 py-2 rounded-lg transition-all duration-300 flex items-center gap-2 ${
@@ -385,6 +386,23 @@ function Dashboard() {
               </button>
             </div>
           </div>
+
+          {/* Sort Dropdown */}
+          <div className="flex items-center gap-2">
+              <label className="text-gray-400 text-sm">Sırala:</label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-4 py-2 bg-dark-900 border border-gold/30 rounded-lg text-white focus:outline-none focus:border-gold transition-colors"
+              >
+                <option value="newest">📅 En Yeni</option>
+                <option value="oldest">📅 En Eski</option>
+                <option value="highest">⭐ En Yüksek Puan</option>
+                <option value="lowest">⭐ En Düşük Puan</option>
+                <option value="az">🔤 A-Z</option>
+                <option value="za">🔤 Z-A</option>
+              </select>
+            </div>
           
           <input
             type="text"
