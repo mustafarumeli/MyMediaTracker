@@ -33,3 +33,5 @@ export async function checkDuplicateAnime(malId, currentMediaId = null) {
   }
 }
 
+
+

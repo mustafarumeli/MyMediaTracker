@@ -27,3 +27,5 @@ function StatCard({ icon, title, value, subtitle, trend, bgColor = 'bg-dark-900'
 
 export default StatCard;
 
+
+

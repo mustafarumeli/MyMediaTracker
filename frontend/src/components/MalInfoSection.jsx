@@ -155,3 +155,5 @@ function MalInfoSection({ media }) {
 
 export default MalInfoSection;
 
+
+

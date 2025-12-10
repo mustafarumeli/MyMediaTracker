@@ -107,6 +107,18 @@ function MediaTableRow({ media, onDelete, onEdit }) {
         </span>
       </td>
 
+      {/* Tekrar */}
+      <td className="p-3 text-center">
+        {media.rewatchCount > 0 ? (
+          <span className="bg-blue-600/20 border border-blue-500/50 text-blue-400 px-2 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1">
+            <span>🔄</span>
+            <span>{media.rewatchCount}</span>
+          </span>
+        ) : (
+          <span className="text-gray-500">-</span>
+        )}
+      </td>
+
       {/* Notlar */}
       <td className="p-3 max-w-xs">
         <div className="text-gray-400 text-sm truncate">
@@ -230,6 +242,7 @@ function MediaTable({ mediaItems, onDelete, onEdit }) {
             </th>
             <th className="p-3 text-center text-gold font-semibold">Bölüm</th>
             <th className="p-3 text-center text-gold font-semibold">Bölüm Ort.</th>
+            <th className="p-3 text-center text-gold font-semibold">Tekrar</th>
             <th className="p-3 text-left text-gold font-semibold">Notlar</th>
             <th 
               className="p-3 text-left text-gold font-semibold cursor-pointer hover:text-gold-light transition-colors"

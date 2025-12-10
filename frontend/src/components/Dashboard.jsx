@@ -3,16 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useMediaItems } from '../hooks/useMediaItems';
+import { useRecommendations } from '../hooks/useRecommendations';
 import MediaForm from './MediaForm';
 import MediaList from './MediaList';
 import MediaTable from './MediaTable';
 import ConfirmDeleteModal from './ConfirmDeleteModal';
+import RecommendationWidget from './RecommendationWidget';
 import { exportMediaData } from '../utils/exportData';
+import { autoMigrateRewatchCount } from '../utils/migrateRewatchCount';
 
 function Dashboard() {
   const navigate = useNavigate();
   const { currentUser, logout } = useAuth();
   const { mediaItems, loading, addMediaItem, updateMediaItem, deleteMediaItem } = useMediaItems();
+  const { recommendations, loading: recsLoading, refresh: refreshRecs } = useRecommendations(mediaItems);
   const [editingItem, setEditingItem] = useState(null);
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,6 +33,17 @@ function Dashboard() {
   useEffect(() => {
     localStorage.setItem('viewMode', viewMode);
   }, [viewMode]);
+
+  // Auto-migrate rewatchCount field for existing media items
+  useEffect(() => {
+    if (!loading && mediaItems.length > 0) {
+      autoMigrateRewatchCount().then(result => {
+        if (result.success && result.migrated > 0) {
+          console.log(`Migrated ${result.migrated} media items with rewatchCount field`);
+        }
+      });
+    }
+  }, [loading, mediaItems.length]);
 
   async function handleLogout() {
     try {
@@ -71,6 +86,21 @@ function Dashboard() {
         duration: 3000,
         position: 'bottom-right'
       });
+    }
+  }
+
+  async function handleAddRecommendation(recommendation) {
+    try {
+      // Remove source and reason fields before adding
+      const { source, reason, relevanceScore, ...mediaData } = recommendation;
+      
+      await addMediaItem(mediaData);
+      
+      // Refresh recommendations after adding
+      setTimeout(() => refreshRecs(), 1000);
+    } catch (error) {
+      console.error('Add recommendation error:', error);
+      throw error;
     }
   }
 
@@ -374,6 +404,16 @@ function Dashboard() {
           className="w-full px-4 py-3 bg-dark-900 border border-gold/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gold focus:shadow-glow-sm transition-all duration-300"
           />
         </div>
+
+        {/* Recommendation Widget */}
+        {!loading && mediaItems.filter(item => item.rating > 0).length >= 5 && (
+          <RecommendationWidget
+            recommendations={recommendations}
+            loading={recsLoading}
+            onRefresh={refreshRecs}
+            onAddRecommendation={handleAddRecommendation}
+          />
+        )}
 
         {/* Media List/Table */}
         {viewMode === 'grid' ? (

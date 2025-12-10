@@ -143,13 +143,23 @@ function MediaCard({ media, onDelete, onEdit }) {
             <span>{media.category}</span>
           </span>
           
-          {/* MAL Score Badge */}
-          {media.malScore && (
-            <span className="bg-gold/20 border border-gold/50 text-gold px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-              <span>⭐</span>
-              <span>{media.malScore.toFixed(1)}</span>
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {/* MAL Score Badge */}
+            {media.malScore && (
+              <span className="bg-gold/20 border border-gold/50 text-gold px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                <span>⭐</span>
+                <span>{media.malScore.toFixed(1)}</span>
+              </span>
+            )}
+            
+            {/* Rewatch Badge */}
+            {media.rewatchCount > 0 && (
+              <span className="bg-blue-600/20 border border-blue-500/50 text-blue-400 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                <span>🔄</span>
+                <span>{media.rewatchCount}</span>
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Title */}

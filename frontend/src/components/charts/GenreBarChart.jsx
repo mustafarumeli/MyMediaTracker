@@ -58,3 +58,5 @@ function GenreBarChart({ data }) {
 
 export default GenreBarChart;
 
+
+

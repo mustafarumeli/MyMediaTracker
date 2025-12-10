@@ -58,3 +58,5 @@ function GenrePieChart({ data }) {
 
 export default GenrePieChart;
 
+
+

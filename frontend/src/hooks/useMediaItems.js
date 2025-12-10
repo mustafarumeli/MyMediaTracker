@@ -5,6 +5,7 @@ import {
   updateDoc,
   deleteDoc,
   doc,
+  getDoc,
   query,
   orderBy,
   onSnapshot,
@@ -103,6 +104,48 @@ export function useMediaItems() {
     }
   };
 
+  const incrementRewatch = async (mediaId) => {
+    try {
+      const mediaRef = doc(db, 'media-items', mediaId);
+      const mediaDoc = await getDoc(mediaRef);
+      
+      if (!mediaDoc.exists()) {
+        throw new Error('Media item not found');
+      }
+      
+      const currentCount = mediaDoc.data().rewatchCount || 0;
+      await updateDoc(mediaRef, { 
+        rewatchCount: currentCount + 1,
+        updatedAt: serverTimestamp()
+      });
+    } catch (err) {
+      console.error('Error incrementing rewatch count:', err);
+      throw err;
+    }
+  };
+
+  const decrementRewatch = async (mediaId) => {
+    try {
+      const mediaRef = doc(db, 'media-items', mediaId);
+      const mediaDoc = await getDoc(mediaRef);
+      
+      if (!mediaDoc.exists()) {
+        throw new Error('Media item not found');
+      }
+      
+      const currentCount = mediaDoc.data().rewatchCount || 0;
+      if (currentCount > 0) {
+        await updateDoc(mediaRef, { 
+          rewatchCount: currentCount - 1,
+          updatedAt: serverTimestamp()
+        });
+      }
+    } catch (err) {
+      console.error('Error decrementing rewatch count:', err);
+      throw err;
+    }
+  };
+
   return {
     mediaItems,
     loading,
@@ -110,7 +153,9 @@ export function useMediaItems() {
     addMediaItem,
     updateMediaItem,
     deleteMediaItem,
-    updateMediaWithJikanData
+    updateMediaWithJikanData,
+    incrementRewatch,
+    decrementRewatch
   };
 }
 

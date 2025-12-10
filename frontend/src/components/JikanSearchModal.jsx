@@ -214,3 +214,5 @@ function JikanSearchModal({ isOpen, onClose, onSelect, initialQuery = '' }) {
 
 export default JikanSearchModal;
 
+
+

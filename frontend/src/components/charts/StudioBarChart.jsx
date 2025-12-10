@@ -54,3 +54,5 @@ function StudioBarChart({ data }) {
 
 export default StudioBarChart;
 
+
+

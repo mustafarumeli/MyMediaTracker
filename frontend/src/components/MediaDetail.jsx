@@ -43,7 +43,7 @@ function MediaDetail() {
     deleteEpisode 
   } = useEpisodes(id);
 
-  const { updateMediaWithJikanData } = useMediaItems();
+  const { updateMediaWithJikanData, incrementRewatch, decrementRewatch } = useMediaItems();
 
   // Fetch media data
   useEffect(() => {
@@ -148,6 +148,52 @@ function MediaDetail() {
 
   const handleJikanSearch = () => {
     setShowJikanModal(true);
+  };
+
+  const handleIncrementRewatch = async () => {
+    try {
+      await incrementRewatch(id);
+      // Refresh media data
+      const mediaRef = doc(db, `media-items/${id}`);
+      const mediaSnap = await getDoc(mediaRef);
+      if (mediaSnap.exists()) {
+        setMedia({ id: mediaSnap.id, ...mediaSnap.data() });
+      }
+      toast.success('Tekrar sayısı artırıldı! 🔄', {
+        duration: 2000,
+        position: 'bottom-right'
+      });
+    } catch (error) {
+      console.error('Error incrementing rewatch:', error);
+      toast.error('Bir hata oluştu.', {
+        duration: 2000,
+        position: 'bottom-right'
+      });
+    }
+  };
+
+  const handleDecrementRewatch = async () => {
+    if ((media.rewatchCount || 0) === 0) return;
+    
+    try {
+      await decrementRewatch(id);
+      // Refresh media data
+      const mediaRef = doc(db, `media-items/${id}`);
+      const mediaSnap = await getDoc(mediaRef);
+      if (mediaSnap.exists()) {
+        setMedia({ id: mediaSnap.id, ...mediaSnap.data() });
+      }
+      toast.success('Tekrar sayısı azaltıldı! 🔄', {
+        duration: 2000,
+        position: 'bottom-right'
+      });
+    } catch (error) {
+      console.error('Error decrementing rewatch:', error);
+      toast.error('Bir hata oluştu.', {
+        duration: 2000,
+        position: 'bottom-right'
+      });
+    }
   };
 
   const handleJikanSelect = async (selectedAnime) => {
@@ -324,6 +370,32 @@ function MediaDetail() {
               <div className="mb-4">
                 <div className="text-sm text-gray-400 mb-2">Genel Puan</div>
                 <StarRating value={media.rating} readonly size="lg" />
+              </div>
+
+              {/* Rewatch Counter */}
+              <div className="mb-4">
+                <div className="text-sm text-gray-400 mb-2">Tekrar İzleme / Oynama</div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleDecrementRewatch}
+                    disabled={(media.rewatchCount || 0) === 0}
+                    className="w-10 h-10 bg-dark-850 border border-gold/30 rounded-lg text-gold hover:bg-gold/20 hover:border-gold transition-all disabled:opacity-30 disabled:cursor-not-allowed text-xl font-bold"
+                  >
+                    −
+                  </button>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-dark-850 border border-gold/30 rounded-lg min-w-[120px] justify-center">
+                    <span className="text-2xl">🔄</span>
+                    <span className="text-2xl font-bold text-gold">
+                      {media.rewatchCount || 0}
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleIncrementRewatch}
+                    className="w-10 h-10 bg-dark-850 border border-gold/30 rounded-lg text-gold hover:bg-gold/20 hover:border-gold transition-all text-xl font-bold"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
 
               {media.notes && (
