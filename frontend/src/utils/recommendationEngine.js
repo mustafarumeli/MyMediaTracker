@@ -206,6 +206,18 @@ export async function generateExternalRecommendations(preferences) {
 }
 
 /**
+ * Normalize title for better matching (remove special chars, lowercase, trim)
+ * @param {string} title - Title to normalize
+ * @returns {string} Normalized title
+ */
+function normalizeTitle(title) {
+  return title
+    .toLowerCase()
+    .replace(/[:\-\s'"!?.,]/g, '') // Remove special chars and spaces
+    .trim();
+}
+
+/**
  * Main recommendation function
  * @param {Array} mediaItems - User's media collection
  * @param {Array} externalItems - Items from external APIs
@@ -222,9 +234,6 @@ export function getRecommendations(mediaItems, externalItems = [], limit = 6) {
   // Analyze preferences
   const preferences = analyzeUserPreferences(mediaItems);
 
-  // Get recommendations from own database
-  const ownRecs = generateOwnRecommendations(mediaItems, preferences);
-
   // Score external items
   const scoredExternalItems = externalItems.map(item => ({
     ...item,
@@ -233,47 +242,40 @@ export function getRecommendations(mediaItems, externalItems = [], limit = 6) {
     source: 'external'
   }));
 
-  // Filter out items user already has
-  const userTitles = new Set(mediaItems.map(item => item.title.toLowerCase()));
+  // Create comprehensive duplicate check sets
+  const userTitles = new Set(mediaItems.map(item => normalizeTitle(item.title)));
+  const userOriginalTitles = new Set(
+    mediaItems
+      .filter(item => item.originalTitle)
+      .map(item => normalizeTitle(item.originalTitle))
+  );
   const userMalIds = new Set(mediaItems.filter(item => item.malId).map(item => item.malId));
+  const userTmdbIds = new Set(mediaItems.filter(item => item.tmdbId).map(item => item.tmdbId));
   
+  // Filter out items user already has
   const filteredExternal = scoredExternalItems.filter(item => {
-    const titleMatch = userTitles.has(item.title.toLowerCase());
+    // Check title
+    const titleMatch = userTitles.has(normalizeTitle(item.title));
+    
+    // Check original title
+    const originalTitleMatch = item.originalTitle && 
+      (userTitles.has(normalizeTitle(item.originalTitle)) ||
+       userOriginalTitles.has(normalizeTitle(item.originalTitle)));
+    
+    // Check MAL ID
     const malIdMatch = item.malId && userMalIds.has(item.malId);
-    return !titleMatch && !malIdMatch;
+    
+    // Check TMDB ID
+    const tmdbIdMatch = item.tmdbId && userTmdbIds.has(item.tmdbId);
+    
+    // Return false (filter out) if any match found
+    return !titleMatch && !originalTitleMatch && !malIdMatch && !tmdbIdMatch;
   });
 
-  // Merge and sort all recommendations
-  const allRecs = [...ownRecs, ...filteredExternal];
-  
   // Sort by relevance score
-  allRecs.sort((a, b) => b.relevanceScore - a.relevanceScore);
+  filteredExternal.sort((a, b) => b.relevanceScore - a.relevanceScore);
 
-  // Return top N, ensuring diversity (mix of own and external)
-  const finalRecs = [];
-  const ownRecsFiltered = allRecs.filter(r => r.source === 'own');
-  const externalRecsFiltered = allRecs.filter(r => r.source === 'external');
-
-  // Alternate between own and external recommendations
-  let ownIndex = 0;
-  let externalIndex = 0;
-  
-  while (finalRecs.length < limit && (ownIndex < ownRecsFiltered.length || externalIndex < externalRecsFiltered.length)) {
-    // Add external first (more interesting for users)
-    if (externalIndex < externalRecsFiltered.length) {
-      finalRecs.push(externalRecsFiltered[externalIndex]);
-      externalIndex++;
-    }
-    
-    if (finalRecs.length >= limit) break;
-    
-    // Then add own
-    if (ownIndex < ownRecsFiltered.length) {
-      finalRecs.push(ownRecsFiltered[ownIndex]);
-      ownIndex++;
-    }
-  }
-
-  return finalRecs.slice(0, limit);
+  // Return top N (only external recommendations)
+  return filteredExternal.slice(0, limit);
 }
 

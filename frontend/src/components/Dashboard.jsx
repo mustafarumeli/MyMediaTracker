@@ -423,16 +423,6 @@ function Dashboard() {
           />
         </div>
 
-        {/* Recommendation Widget */}
-        {!loading && mediaItems.filter(item => item.rating > 0).length >= 5 && (
-          <RecommendationWidget
-            recommendations={recommendations}
-            loading={recsLoading}
-            onRefresh={refreshRecs}
-            onAddRecommendation={handleAddRecommendation}
-          />
-        )}
-
         {/* Media List/Table */}
         {viewMode === 'grid' ? (
           <MediaList
@@ -446,6 +436,16 @@ function Dashboard() {
             mediaItems={sortedMedia}
             onDelete={handleDeleteMedia}
             onEdit={handleEditMedia}
+          />
+        )}
+
+        {/* Recommendation Widget */}
+        {!loading && mediaItems.filter(item => item.rating > 0).length >= 5 && (
+          <RecommendationWidget
+            recommendations={recommendations}
+            loading={recsLoading}
+            onRefresh={refreshRecs}
+            onAddRecommendation={handleAddRecommendation}
           />
         )}
       </div>
